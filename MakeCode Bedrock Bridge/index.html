@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0e0e18">
+  <meta name="description" content="Windows 版 Minecraft 統合版で MakeCode を使うためのツール。ダウンロードと接続手順をご案内します。">
+  <title>MakeCode Bedrock Bridge</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --page: #10101a;
+      --surface: #181825;
+      --surface-raised: #1f1e30;
+      --ink: #f8f7ff;
+      --muted: #c1bfd3;
+      --soft: #a9a6be;
+      --line: #333247;
+      --accent: #c2b7ff;
+      --primary: #c5b6ff;
+      --radius: 14px;
+      --sans: "Segoe UI", "Yu Gothic UI", Meiryo, system-ui, sans-serif;
+      --mono: "Cascadia Code", Consolas, monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--page); color: var(--ink); font: 1rem/1.72 var(--sans); }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button { font: inherit; }
+    a { color: inherit; }
+    p, h1, h2, h3 { margin: 0; }
+    h2 { font-size: clamp(1.75rem, 3.8vw, 2.7rem); line-height: 1.24; letter-spacing: -.045em; }
+    h3 { font-size: 1.18rem; line-height: 1.4; }
+    code { font-family: var(--mono); }
+    :focus-visible { outline: 2px solid #8ef1ff; outline-offset: 4px; }
+    [id] { scroll-margin-top: 1.5rem; }
+    .shell { width: min(1120px, 100% - 3rem); margin-inline: auto; }
+    .skip { position: fixed; z-index: 3; top: .75rem; left: .75rem; padding: .6rem 1rem; background: var(--surface-raised); transform: translateY(-160%); }
+    .skip:focus { transform: none; }
+
+    .masthead { background: #10101bee; border-bottom: 1px solid #29283c; }
+    .masthead .shell { min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
+    .brand { display: inline-flex; align-items: center; gap: .62rem; text-decoration: none; font-weight: 750; white-space: nowrap; letter-spacing: -.035em; }
+    .brand-icon { position: relative; flex: 0 0 32px; height: 32px; border-radius: 8px; background: #2b2549; border: 1px solid #4b3d72; }
+    .brand-icon::before, .brand-icon::after { content: ""; position: absolute; width: 10px; height: 10px; border: 1.5px solid #e2dcff; border-radius: 2px; transform: rotate(-10deg); }
+    .brand-icon::before { left: 7px; top: 7px; background: #2b2549; }
+    .brand-icon::after { left: 13px; top: 13px; background: #a996fa; }
+    .nav { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem 1.55rem; }
+    .nav a { padding-block: .5rem; color: var(--muted); text-decoration: none; font-size: .875rem; font-weight: 650; }
+    .nav a:hover { color: var(--ink); }
+    .nav .nav-download { color: #eee9ff; border: 1px solid #534878; border-radius: 8px; padding: .42rem .78rem; }
+    .nav .nav-download:hover { background: #302543; }
+
+    .hero { position: relative; isolation: isolate; display: grid; align-items: center; min-height: 565px; overflow: hidden; background: radial-gradient(ellipse at 82% 45%, #3c306e 0%, #191a39 37%, #10101c 75%); border-bottom: 1px solid #34324a; }
+    .hero-art { position: absolute; z-index: -2; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 50%; }
+    .hero::before { position: absolute; content: ""; z-index: -1; inset: 0; background: linear-gradient(90deg, #10101dfd 0%, #10101dec 25%, #10101d9e 45%, #10101d08 76%), linear-gradient(0deg, #11111ece, transparent 24%); }
+    .hero-copy { padding-block: 5rem; }
+    .platform { display: inline-flex; gap: .55rem; align-items: center; margin-bottom: 1.15rem; color: #e2d9ff; font-size: .875rem; font-weight: 650; white-space: nowrap; }
+    .platform::before { content: ""; flex: 0 0 6px; height: 6px; background: #c2b7ff; transform: rotate(45deg); }
+    .hero h1 { font: 780 clamp(3.1rem, 7.3vw, 6.25rem)/.99 var(--sans); letter-spacing: -.085em; text-wrap: balance; }
+    .hero h1 span { display: block; color: #cebeff; }
+    .hero-lead { margin-top: 1.5rem; color: #e0dff1; font-size: clamp(1rem, 1.8vw, 1.24rem); font-weight: 600; line-height: 1.8; }
+    .actions { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; margin-top: 1.85rem; }
+    .button { display: inline-flex; align-items: center; justify-content: center; min-height: 45px; padding: .66rem .98rem; border-radius: 9px; border: 1px solid transparent; line-height: 1.4; font-weight: 720; text-decoration: none; font-size: .92rem; }
+    .button-primary { background: var(--primary); color: #191330; }
+    .button-primary:hover { background: #ddd2ff; }
+    .button-secondary { border-color: #514664; background: #141320b8; color: #f2eeff; }
+    .button-secondary:hover { background: #2b2440; }
+    .hero-meta { margin-top: .78rem; color: #c6c4d8; font-size: .86rem; }
+
+    .section { padding-block: clamp(3.25rem, 7vw, 6rem); }
+    .section + .section { border-top: 1px solid #29283b; }
+    .section-head { margin-bottom: clamp(1.6rem, 4vw, 2.65rem); }
+    .section-head p { margin-top: .6rem; color: var(--muted); }
+    .guide-grid { display: grid; grid-template-columns: 1.12fr 1fr; gap: clamp(1.6rem, 5.5vw, 4.5rem); align-items: start; }
+    .steps { list-style: none; margin: 0; padding: 0; counter-reset: step; }
+    .steps li { counter-increment: step; position: relative; padding-left: 3.25rem; }
+    .steps li + li { margin-top: 1.45rem; }
+    .steps li::before { content: counter(step); display: grid; place-items: center; position: absolute; top: .04rem; left: 0; width: 2.25rem; height: 2.25rem; border: 1px solid #52446f; border-radius: 9px; background: #262039; color: #ddceff; font: 600 .9rem/1 var(--mono); }
+    .steps p, .example p, .release p { margin-top: .45rem; color: var(--muted); }
+    .command { display: flex; align-items: center; gap: .6rem; justify-content: space-between; background: #0e0e18; border: 1px solid var(--line); border-radius: 9px; padding: .5rem .55rem .5rem .72rem; margin-top: .78rem; }
+    .command code { font-size: .9rem; color: #c9eaff; overflow-wrap: anywhere; }
+    .copy { border: 1px solid #504968; color: #f6f0ff; background: #29233b; border-radius: 6px; min-height: 36px; padding: .25rem .62rem; font-size: .875rem; font-weight: 650; white-space: nowrap; cursor: pointer; }
+    .copy:hover { background: #3c3055; }
+    .copy-status { display: block; margin-top: .38rem; color: #a9e9d8; font-size: .875rem; }
+    .copy-status:empty { margin: 0; }
+    .example { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+    .example-top { padding: 1.2rem 1.3rem 1.1rem; }
+    .editor-head { display: flex; align-items: center; justify-content: space-between; gap: .65rem; padding: .55rem .8rem; background: #202032; color: #d2c9eb; border-bottom: 1px solid #36344c; font-size: .875rem; font-weight: 650; }
+    .editor { overflow: hidden; margin: 0 1.22rem 1.22rem; border: 1px solid #36344c; background: #10101a; border-radius: 9px; }
+    pre { margin: 0; padding: .9rem .8rem 1rem; color: #edf1ff; font: .86rem/1.8 var(--mono); overflow-x: auto; }
+    .keyword { color: #d7b4ff; }
+    .string { color: #aee8c2; }
+    .function { color: #a5d7ff; }
+    .chat-result { margin: 0 1.22rem 1.25rem; padding: .65rem .78rem; border-left: 2px solid #80dabe; background: #192823; font-size: .9rem; color: #e1fbeb; }
+    .chat-result code { font-weight: 700; }
+
+    .releases { background: #141421; }
+    .release-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    .release { display: grid; grid-template-rows: auto 1fr auto; padding: clamp(1.15rem, 3vw, 1.7rem); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+    .release:first-child { border-color: #544673; background: linear-gradient(140deg, #242038, #181825 64%); }
+    .release-type { display: block; margin-bottom: .45rem; color: var(--accent); font-size: .875rem; font-weight: 700; }
+    .release h3 { font-size: clamp(1.08rem, 2.4vw, 1.52rem); letter-spacing: -.03em; }
+    .release a:not(.button) { color: var(--accent); text-underline-offset: .2em; }
+    .release-footer { margin-top: 1.15rem; padding-top: 1rem; border-top: 1px solid var(--line); display: flex; align-items: center; flex-wrap: wrap; gap: .6rem .85rem; }
+    .release-meta { color: var(--muted); font-size: .875rem; }
+    .source-download { margin-top: 1rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+    .source-download .actions { margin-top: 0; }
+
+    .faq-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2.1fr); gap: 1.5rem 2rem; align-items: start; }
+    .faq { border-top: 1px solid var(--line); }
+    .faq details { border-bottom: 1px solid var(--line); }
+    .faq summary { display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 54px; padding: .64rem .12rem; cursor: pointer; font-weight: 680; list-style: none; }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary::after { content: "+"; font: 500 1.35rem/1 var(--mono); color: var(--accent); }
+    .faq details[open] summary::after { content: "−"; }
+    .faq summary:hover { color: var(--accent); }
+    .faq details p { color: var(--muted); padding: .1rem 1.1rem .9rem .12rem; }
+    .faq a { text-underline-offset: .2em; }
+
+    .footer { padding-block: 1.4rem; border-top: 1px solid #2c2b3f; background: #0d0d15; }
+    .footer .shell { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6rem 1.5rem; }
+    .footer p { color: var(--soft); font-size: .86rem; }
+
+    @media (max-width: 860px) {
+      .hero { min-height: 490px; }
+      .hero-art { object-position: 62% center; }
+      .hero::before { background: linear-gradient(90deg, #10101df9, #10101dbf 43%, #10101d20), linear-gradient(0deg, #11111ed6, transparent 35%); }
+      .guide-grid { gap: 2rem; }
+    }
+    @media (max-width: 700px) {
+      .shell { width: calc(100% - 2rem); }
+      .masthead .shell { flex-wrap: wrap; gap: .45rem 1rem; justify-content: space-between; padding-block: .65rem; }
+      .nav { gap: .25rem .85rem; }
+      .hero { min-height: 455px; }
+      .hero-copy { padding-block: 3.8rem; }
+      .hero-art { object-position: 70% center; }
+      .hero::before { background: linear-gradient(90deg, #10101dec, #10101d63), linear-gradient(0deg, #11111edc, transparent 70%); }
+      .guide-grid, .release-grid, .faq-layout { grid-template-columns: 1fr; }
+      .faq-layout .section-head { margin-bottom: 0; }
+    }
+    @media (max-width: 380px) {
+      .platform { gap: .4rem; font-size: clamp(.6875rem, 4.6vw, .875rem); }
+      .hero h1 { font-size: clamp(2.56rem, 13vw, 3.05rem); }
+      .steps li { padding-left: 2.78rem; }
+      .command { gap: .36rem; }
+      .command code { font-size: .83rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">本文に移動</a>
+  <header class="masthead" id="top">
+    <div class="shell">
+      <a class="brand" href="#top"><span class="brand-icon" aria-hidden="true"></span>MakeCode Bedrock Bridge</a>
+      <nav class="nav" aria-label="ページ内メニュー">
+        <a href="#guide">使い方</a>
+        <a href="#faq">よくある質問</a>
+        <a class="nav-download" href="#downloads">ダウンロード</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-labelledby="product-title">
+      <img class="hero-art" src="data/bridge-hero.webp" alt="" width="1536" height="1024" fetchpriority="high">
+      <div class="shell hero-copy">
+        <p class="platform">Minecraft 統合版 / Windows 64 ビット</p>
+        <h1 id="product-title">MakeCode <span>Bedrock Bridge</span></h1>
+        <p class="hero-lead">MakeCode で作ったプログラムを、<br>自分の Minecraft ワールドで動かそう。</p>
+        <div class="actions">
+          <a class="button button-primary" href="data/MakeCode-Bedrock-Bridge-v1.1.1.exe" download>Windows EXE をダウンロード</a>
+          <a class="button button-secondary" href="#node-download">Node.js 版を見る</a>
+        </div>
+        <p class="hero-meta">v1.1.1 · EXE 版 / Node.js 版</p>
+      </div>
+    </section>
+
+    <section class="section shell" id="guide" aria-labelledby="guide-title">
+      <div class="section-head">
+        <h2 id="guide-title">使い方</h2>
+        <p>Minecraft for Windows、Microsoft Edge、インターネット接続が必要です。</p>
+      </div>
+      <div class="guide-grid">
+        <ol class="steps" role="list">
+          <li>
+            <h3>Bridge を起動</h3>
+            <p>EXE を開きます。Node.js 版は ZIP を展開して <code>Start.cmd</code> を開きます。Edge に MakeCode が開いたら、Bridge の黒いウィンドウも開いたままにします。</p>
+          </li>
+          <li>
+            <h3>Minecraft から接続</h3>
+            <p>「設定 → 一般 → WebSocket を有効にする」をオンにします。チートが有効なワールドに入り、チャットでこのコマンドを送ります。</p>
+            <div class="command">
+              <code id="connect-command">/connect 127.0.0.1:19135</code>
+              <button class="copy" type="button" data-copy="connect-command" aria-describedby="connect-status">コピー</button>
+            </div>
+            <span class="copy-status" id="connect-status" role="status"></span>
+          </li>
+          <li>
+            <h3>MakeCode で実行</h3>
+            <p>黒いウィンドウに「接続済み」と表示されたら、MakeCode でプロジェクトを開き、▶ を押します。</p>
+          </li>
+        </ol>
+
+        <article class="example" aria-labelledby="example-title">
+          <div class="example-top">
+            <h3 id="example-title">チャットで動作を確認</h3>
+            <p>新しいプロジェクトを作り、JavaScript に切り替えて貼り付けます。</p>
+          </div>
+          <div class="editor">
+            <div class="editor-head">
+              JavaScript
+              <button class="copy" type="button" data-copy="example-code" aria-describedby="example-status">コードをコピー</button>
+            </div>
+            <pre><code id="example-code">player.<span class="function">onChat</span>(<span class="string">"hello"</span>, <span class="keyword">function</span> () {
+    player.<span class="function">say</span>(<span class="string">"MakeCode OK!"</span>)
+})</code></pre>
+          </div>
+          <p class="chat-result">▶ を押して、Minecraft のチャットに <code>hello</code> と入力します。<code>MakeCode OK!</code> と出れば成功です。<span class="copy-status" id="example-status" role="status"></span></p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section releases" id="downloads" aria-labelledby="downloads-title">
+      <div class="shell">
+        <div class="section-head"><h2 id="downloads-title">ダウンロード</h2></div>
+        <div class="release-grid">
+          <article class="release">
+            <div><span class="release-type">Node.js 同梱</span><h3>Windows EXE 版</h3></div>
+            <p>ダウンロードした EXE をダブルクリックすると起動します。</p>
+            <div class="release-footer">
+              <a class="button button-primary" href="data/MakeCode-Bedrock-Bridge-v1.1.1.exe" download>EXE をダウンロード</a>
+              <span class="release-meta">v1.1.1 · 38.5 MB</span>
+            </div>
+          </article>
+          <article class="release" id="node-download">
+            <div><span class="release-type">Node.js 22 以上が必要</span><h3>Node.js 版</h3></div>
+            <p>ZIP をすべて展開し、<code>Start.cmd</code> をダブルクリックします。<br><a href="https://nodejs.org/ja/download">Node.js を公式サイトから入手</a></p>
+            <div class="release-footer">
+              <a class="button button-secondary" href="data/MakeCode-Bedrock-Bridge-Node-v1.1.1.zip" download>Node.js 版の ZIP をダウンロード</a>
+              <span class="release-meta">v1.1.1 · 3.4 MB</span>
+            </div>
+          </article>
+        </div>
+        <article class="release source-download" aria-labelledby="source-title">
+          <div>
+            <h3 id="source-title">ソースコード</h3>
+            <p>配布版のソースコードは Node.js 版 ZIP に入っています。</p>
+          </div>
+          <div class="actions">
+            <a class="button button-secondary" href="https://github.com/na05695-dev/MakeCodeBedrockBridge">GitHub で見る</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section shell faq-layout" id="faq" aria-labelledby="faq-title">
+      <div class="section-head"><h2 id="faq-title">よくある質問</h2></div>
+      <div class="faq">
+        <details>
+          <summary>Code Connection アプリは必要ですか？</summary>
+          <p>不要です。旧 Code Connection や CodeConnectFix が起動中なら閉じてから、Bridge を起動してください。</p>
+        </details>
+        <details>
+          <summary>接続できないときは？</summary>
+          <p>WebSocket とワールドのチートがオンか、チャットの接続先が Bridge の黒いウィンドウに表示されたポートと同じかを確認してください。ワールドに入り直したら、<a href="#connect-command">接続コマンド</a>をもう一度送ります。</p>
+        </details>
+        <details>
+          <summary>暗号化の設定はどうしますか？</summary>
+          <p>Minecraft の「暗号化された WebSocket の要求」はオンのまま、どちらの版でも接続できます。</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="shell">
+      <a class="brand" href="#top"><span class="brand-icon" aria-hidden="true"></span>MakeCode Bedrock Bridge</a>
+      <p>Minecraft 統合版向けのコミュニティツール</p>
+    </div>
+  </footer>
+  <script>
+    async function copyText(source) {
+      try {
+        await navigator.clipboard.writeText(source.textContent);
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents(source);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        if (!document.execCommand("copy")) return "選択したテキストを Ctrl+C でコピーしてください。";
+        selection.removeAllRanges();
+      }
+      return "コピーしました。";
+    }
+
+    document.querySelectorAll("[data-copy]").forEach(button => {
+      button.addEventListener("click", async () => {
+        const source = document.getElementById(button.dataset.copy);
+        const status = document.getElementById(button.getAttribute("aria-describedby"));
+        status.textContent = "";
+        status.textContent = await copyText(source);
+      });
+    });
+  </script>
+</body>
+</html>
